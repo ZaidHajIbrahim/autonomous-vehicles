@@ -1,0 +1,22 @@
+<routes>
+    <route edges="25526709 637268705 26073972 98618868#0 98618868#1 98618868#2 31115977 31115979" color="yellow" id="route_0"/>
+    
+<vType accel="4" decel="7.5" emergencyDecel="10" minGap="1.0" id="Car0" maxSpeed="36.11111111111"/>
+<vType accel="4" decel="7.5" emergencyDecel="10" minGap="1.0" id="Car1" maxSpeed="30.11111111111"/>
+<vType accel="4" decel="7.5" emergencyDecel="10" minGap="1.0" id="Car2" maxSpeed="25.11111111111"/>
+<vType accel="4" decel="7.5" emergencyDecel="10" minGap="1.0" id="Car3" maxSpeed="30.11111111111"/>
+
+<vehicle id="veh1" type="Car0" depart="0.305337402498" route="route_0">
+</vehicle>
+<vehicle id="veh2" type="Car1" depart="0.405337402498" route="route_0">
+</vehicle>
+<vehicle id="veh3" type="Car3" depart="0.505337402498" route="route_0">
+</vehicle>
+<vehicle id="veh4" type="Car0" depart="0.605337402498" route="route_0">
+</vehicle>
+<vehicle id="veh5" type="Car1" depart="0.705337402498" route="route_0">
+</vehicle>
+<vehicle id="veh6" type="Car2" depart="0.805337402498" route="route_0">
+</vehicle>
+    
+</routes>
