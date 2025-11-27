@@ -1,0 +1,18 @@
+<routes>
+   <route id="route_0" edges="edge_id_1 edge_id_2 edge_id_3 edge_id_4" color="blue"/>    
+   <route id="route_1" edges="edge_id_5 edge_id_6 edge_id_7" color="yellow"/> 
+
+   
+   <vType accel="4" decel="7.5" emergencyDecel="10" minGap="1.0" id="TypeA" maxSpeed="15" color="red"/>
+   <vType accel="100" decel="7.5" emergencyDecel="10" minGap="1.0" id="TypeB" maxSpeed="70" color="red"/>
+   
+   <vehicle id="veh0" type="TypeA" depart="0.5" route="route_1" repeat="true"> 
+ </vehicle>
+
+   <vehicle id="veh1" type="TypeB" depart="5.0" route="route_1" repeat="true"> 
+    <param key="carFollowModel.ignoreIDs" value="veh0"/>
+   </vehicle>
+
+</routes>
+
+
