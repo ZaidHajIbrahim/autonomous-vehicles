@@ -8,5 +8,5 @@
 	- Username: admin
 	- Password: admin
 	- Y for anonymous login
-- cd ~/DAT295/<DIR>/bin/ && ./run
+- cd ~/DAT295/<DIR>/bin/ && ./artemis run
 
