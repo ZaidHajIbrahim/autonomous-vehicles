@@ -232,132 +232,132 @@ extern const uint16_t FIELD_FIELDS[];
 
 struct FIELD_STRINGS {
   const char STRING0[sizeof("")];
-  const char FIELD_STRINGS_state[sizeof("state")];
-  const char FIELD_STRINGS_coordinator[sizeof("coordinator")];
-  const char FIELD_STRINGS_section_number[sizeof("section-number")];
-  const char FIELD_STRINGS_dynamic[sizeof("dynamic")];
-  const char FIELD_STRINGS_fail[sizeof("fail")];
-  const char FIELD_STRINGS_attach[sizeof("attach")];
-  const char FIELD_STRINGS_desired_capabilities[sizeof("desired-capabilities")];
-  const char FIELD_STRINGS_max_frame_size[sizeof("max-frame-size")];
-  const char FIELD_STRINGS_subject[sizeof("subject")];
-  const char FIELD_STRINGS_code[sizeof("code")];
-  const char FIELD_STRINGS_declare[sizeof("declare")];
-  const char FIELD_STRINGS_absolute_expiry_time[sizeof("absolute-expiry-time")];
-  const char FIELD_STRINGS_delete_on_close[sizeof("delete-on-close")];
-  const char FIELD_STRINGS_timeout[sizeof("timeout")];
-  const char FIELD_STRINGS_description[sizeof("description")];
-  const char FIELD_STRINGS_echo[sizeof("echo")];
-  const char FIELD_STRINGS_condition[sizeof("condition")];
-  const char FIELD_STRINGS_released[sizeof("released")];
-  const char FIELD_STRINGS_priority[sizeof("priority")];
   const char FIELD_STRINGS_rcv_settle_mode[sizeof("rcv-settle-mode")];
-  const char FIELD_STRINGS_message_annotations[sizeof("message-annotations")];
-  const char FIELD_STRINGS_sasl_init[sizeof("sasl-init")];
-  const char FIELD_STRINGS_outcome[sizeof("outcome")];
-  const char FIELD_STRINGS_begin[sizeof("begin")];
-  const char FIELD_STRINGS_outgoing_window[sizeof("outgoing-window")];
-  const char FIELD_STRINGS_delete_on_no_links_or_messages[sizeof("delete-on-no-links-or-messages")];
-  const char FIELD_STRINGS_challenge[sizeof("challenge")];
-  const char FIELD_STRINGS_delivery_failed[sizeof("delivery-failed")];
-  const char FIELD_STRINGS_first[sizeof("first")];
-  const char FIELD_STRINGS_detach[sizeof("detach")];
-  const char FIELD_STRINGS_target[sizeof("target")];
-  const char FIELD_STRINGS_drain[sizeof("drain")];
-  const char FIELD_STRINGS_close[sizeof("close")];
-  const char FIELD_STRINGS_message_id[sizeof("message-id")];
-  const char FIELD_STRINGS_disposition[sizeof("disposition")];
-  const char FIELD_STRINGS_footer[sizeof("footer")];
-  const char FIELD_STRINGS_transactional_state[sizeof("transactional-state")];
-  const char FIELD_STRINGS_next_outgoing_id[sizeof("next-outgoing-id")];
-  const char FIELD_STRINGS_durable[sizeof("durable")];
-  const char FIELD_STRINGS_dynamic_node_properties[sizeof("dynamic-node-properties")];
-  const char FIELD_STRINGS_name[sizeof("name")];
-  const char FIELD_STRINGS_last[sizeof("last")];
-  const char FIELD_STRINGS_incomplete_unsettled[sizeof("incomplete-unsettled")];
-  const char FIELD_STRINGS_group_sequence[sizeof("group-sequence")];
-  const char FIELD_STRINGS_offered_capabilities[sizeof("offered-capabilities")];
-  const char FIELD_STRINGS_capabilities[sizeof("capabilities")];
-  const char FIELD_STRINGS_info[sizeof("info")];
-  const char FIELD_STRINGS_content_encoding[sizeof("content-encoding")];
-  const char FIELD_STRINGS_delivery_tag[sizeof("delivery-tag")];
-  const char FIELD_STRINGS_ttl[sizeof("ttl")];
-  const char FIELD_STRINGS_handle_max[sizeof("handle-max")];
-  const char FIELD_STRINGS_closed[sizeof("closed")];
-  const char FIELD_STRINGS_delivery_count[sizeof("delivery-count")];
-  const char FIELD_STRINGS_channel_max[sizeof("channel-max")];
-  const char FIELD_STRINGS_snd_settle_mode[sizeof("snd-settle-mode")];
-  const char FIELD_STRINGS_max_message_size[sizeof("max-message-size")];
-  const char FIELD_STRINGS_hostname[sizeof("hostname")];
-  const char FIELD_STRINGS_reply_to_group_id[sizeof("reply-to-group-id")];
-  const char FIELD_STRINGS_source[sizeof("source")];
-  const char FIELD_STRINGS_outcomes[sizeof("outcomes")];
-  const char FIELD_STRINGS_link_credit[sizeof("link-credit")];
-  const char FIELD_STRINGS_batchable[sizeof("batchable")];
-  const char FIELD_STRINGS_sasl_challenge[sizeof("sasl-challenge")];
-  const char FIELD_STRINGS_sasl_outcome[sizeof("sasl-outcome")];
-  const char FIELD_STRINGS_aborted[sizeof("aborted")];
-  const char FIELD_STRINGS_delivery_id[sizeof("delivery-id")];
-  const char FIELD_STRINGS_data[sizeof("data")];
-  const char FIELD_STRINGS_modified[sizeof("modified")];
-  const char FIELD_STRINGS_application_properties[sizeof("application-properties")];
-  const char FIELD_STRINGS_initial_response[sizeof("initial-response")];
-  const char FIELD_STRINGS_response[sizeof("response")];
-  const char FIELD_STRINGS_sasl_mechanisms[sizeof("sasl-mechanisms")];
-  const char FIELD_STRINGS_delivery_annotations[sizeof("delivery-annotations")];
-  const char FIELD_STRINGS_undeliverable_here[sizeof("undeliverable-here")];
-  const char FIELD_STRINGS_transfer[sizeof("transfer")];
-  const char FIELD_STRINGS_address[sizeof("address")];
-  const char FIELD_STRINGS_delete_on_no_messages[sizeof("delete-on-no-messages")];
-  const char FIELD_STRINGS_to[sizeof("to")];
-  const char FIELD_STRINGS_txn_id[sizeof("txn-id")];
-  const char FIELD_STRINGS_flow[sizeof("flow")];
-  const char FIELD_STRINGS_remote_channel[sizeof("remote-channel")];
-  const char FIELD_STRINGS_delete_on_no_links[sizeof("delete-on-no-links")];
-  const char FIELD_STRINGS_incoming_window[sizeof("incoming-window")];
-  const char FIELD_STRINGS_amqp_value[sizeof("amqp-value")];
-  const char FIELD_STRINGS_first_acquirer[sizeof("first-acquirer")];
-  const char FIELD_STRINGS_settled[sizeof("settled")];
-  const char FIELD_STRINGS_discharge[sizeof("discharge")];
-  const char FIELD_STRINGS_role[sizeof("role")];
-  const char FIELD_STRINGS_resume[sizeof("resume")];
-  const char FIELD_STRINGS_accepted[sizeof("accepted")];
-  const char FIELD_STRINGS_properties[sizeof("properties")];
-  const char FIELD_STRINGS_initial_delivery_count[sizeof("initial-delivery-count")];
-  const char FIELD_STRINGS_incoming_locales[sizeof("incoming-locales")];
-  const char FIELD_STRINGS_received[sizeof("received")];
   const char FIELD_STRINGS_idle_time_out[sizeof("idle-time-out")];
-  const char FIELD_STRINGS_filter[sizeof("filter")];
-  const char FIELD_STRINGS_end[sizeof("end")];
-  const char FIELD_STRINGS_section_offset[sizeof("section-offset")];
-  const char FIELD_STRINGS_mechanism[sizeof("mechanism")];
   const char FIELD_STRINGS_unsettled[sizeof("unsettled")];
-  const char FIELD_STRINGS_creation_time[sizeof("creation-time")];
+  const char FIELD_STRINGS_disposition[sizeof("disposition")];
+  const char FIELD_STRINGS_delivery_tag[sizeof("delivery-tag")];
+  const char FIELD_STRINGS_detach[sizeof("detach")];
+  const char FIELD_STRINGS_info[sizeof("info")];
+  const char FIELD_STRINGS_header[sizeof("header")];
+  const char FIELD_STRINGS_txn_id[sizeof("txn-id")];
+  const char FIELD_STRINGS_rejected[sizeof("rejected")];
+  const char FIELD_STRINGS_priority[sizeof("priority")];
+  const char FIELD_STRINGS_max_frame_size[sizeof("max-frame-size")];
+  const char FIELD_STRINGS_name[sizeof("name")];
+  const char FIELD_STRINGS_close[sizeof("close")];
+  const char FIELD_STRINGS_delete_on_close[sizeof("delete-on-close")];
+  const char FIELD_STRINGS_discharge[sizeof("discharge")];
+  const char FIELD_STRINGS_code[sizeof("code")];
+  const char FIELD_STRINGS_additional_data[sizeof("additional-data")];
+  const char FIELD_STRINGS_filter[sizeof("filter")];
+  const char FIELD_STRINGS_outcomes[sizeof("outcomes")];
+  const char FIELD_STRINGS_undeliverable_here[sizeof("undeliverable-here")];
+  const char FIELD_STRINGS_content_type[sizeof("content-type")];
   const char FIELD_STRINGS_global_id[sizeof("global-id")];
-  const char FIELD_STRINGS_message_format[sizeof("message-format")];
+  const char FIELD_STRINGS_flow[sizeof("flow")];
+  const char FIELD_STRINGS_first_acquirer[sizeof("first-acquirer")];
+  const char FIELD_STRINGS_amqp_value[sizeof("amqp-value")];
+  const char FIELD_STRINGS_delivery_annotations[sizeof("delivery-annotations")];
+  const char FIELD_STRINGS_outgoing_window[sizeof("outgoing-window")];
+  const char FIELD_STRINGS_timeout[sizeof("timeout")];
+  const char FIELD_STRINGS_aborted[sizeof("aborted")];
+  const char FIELD_STRINGS_link_credit[sizeof("link-credit")];
+  const char FIELD_STRINGS_initial_response[sizeof("initial-response")];
+  const char FIELD_STRINGS_error[sizeof("error")];
+  const char FIELD_STRINGS_fail[sizeof("fail")];
+  const char FIELD_STRINGS_absolute_expiry_time[sizeof("absolute-expiry-time")];
+  const char FIELD_STRINGS_incomplete_unsettled[sizeof("incomplete-unsettled")];
+  const char FIELD_STRINGS_sasl_server_mechanisms[sizeof("sasl-server-mechanisms")];
+  const char FIELD_STRINGS_delivery_count[sizeof("delivery-count")];
+  const char FIELD_STRINGS_response[sizeof("response")];
+  const char FIELD_STRINGS_initial_delivery_count[sizeof("initial-delivery-count")];
+  const char FIELD_STRINGS_desired_capabilities[sizeof("desired-capabilities")];
+  const char FIELD_STRINGS_released[sizeof("released")];
+  const char FIELD_STRINGS_sasl_init[sizeof("sasl-init")];
   const char FIELD_STRINGS_open[sizeof("open")];
+  const char FIELD_STRINGS_remote_channel[sizeof("remote-channel")];
+  const char FIELD_STRINGS_sasl_response[sizeof("sasl-response")];
+  const char FIELD_STRINGS_message_id[sizeof("message-id")];
+  const char FIELD_STRINGS_container_id[sizeof("container-id")];
+  const char FIELD_STRINGS_data[sizeof("data")];
+  const char FIELD_STRINGS_handle[sizeof("handle")];
+  const char FIELD_STRINGS_application_properties[sizeof("application-properties")];
+  const char FIELD_STRINGS_end[sizeof("end")];
+  const char FIELD_STRINGS_modified[sizeof("modified")];
+  const char FIELD_STRINGS_delete_on_no_messages[sizeof("delete-on-no-messages")];
+  const char FIELD_STRINGS_max_message_size[sizeof("max-message-size")];
+  const char FIELD_STRINGS_next_outgoing_id[sizeof("next-outgoing-id")];
+  const char FIELD_STRINGS_more[sizeof("more")];
+  const char FIELD_STRINGS_transfer[sizeof("transfer")];
+  const char FIELD_STRINGS_outcome[sizeof("outcome")];
+  const char FIELD_STRINGS_creation_time[sizeof("creation-time")];
+  const char FIELD_STRINGS_message_format[sizeof("message-format")];
+  const char FIELD_STRINGS_outgoing_locales[sizeof("outgoing-locales")];
   const char FIELD_STRINGS_group_id[sizeof("group-id")];
   const char FIELD_STRINGS_next_incoming_id[sizeof("next-incoming-id")];
-  const char FIELD_STRINGS_sasl_server_mechanisms[sizeof("sasl-server-mechanisms")];
-  const char FIELD_STRINGS_declared[sizeof("declared")];
-  const char FIELD_STRINGS_container_id[sizeof("container-id")];
-  const char FIELD_STRINGS_reply_to[sizeof("reply-to")];
-  const char FIELD_STRINGS_expiry_policy[sizeof("expiry-policy")];
-  const char FIELD_STRINGS_additional_data[sizeof("additional-data")];
+  const char FIELD_STRINGS_group_sequence[sizeof("group-sequence")];
+  const char FIELD_STRINGS_echo[sizeof("echo")];
+  const char FIELD_STRINGS_section_offset[sizeof("section-offset")];
+  const char FIELD_STRINGS_condition[sizeof("condition")];
+  const char FIELD_STRINGS_closed[sizeof("closed")];
+  const char FIELD_STRINGS_incoming_window[sizeof("incoming-window")];
   const char FIELD_STRINGS_distribution_mode[sizeof("distribution-mode")];
-  const char FIELD_STRINGS_error[sizeof("error")];
-  const char FIELD_STRINGS_content_type[sizeof("content-type")];
-  const char FIELD_STRINGS_available[sizeof("available")];
-  const char FIELD_STRINGS_rejected[sizeof("rejected")];
-  const char FIELD_STRINGS_amqp_sequence[sizeof("amqp-sequence")];
-  const char FIELD_STRINGS_outgoing_locales[sizeof("outgoing-locales")];
-  const char FIELD_STRINGS_handle[sizeof("handle")];
-  const char FIELD_STRINGS_sasl_response[sizeof("sasl-response")];
-  const char FIELD_STRINGS_correlation_id[sizeof("correlation-id")];
-  const char FIELD_STRINGS_more[sizeof("more")];
+  const char FIELD_STRINGS_drain[sizeof("drain")];
+  const char FIELD_STRINGS_subject[sizeof("subject")];
+  const char FIELD_STRINGS_dynamic_node_properties[sizeof("dynamic-node-properties")];
   const char FIELD_STRINGS_default_outcome[sizeof("default-outcome")];
-  const char FIELD_STRINGS_header[sizeof("header")];
+  const char FIELD_STRINGS_delivery_id[sizeof("delivery-id")];
+  const char FIELD_STRINGS_declared[sizeof("declared")];
+  const char FIELD_STRINGS_attach[sizeof("attach")];
   const char FIELD_STRINGS_user_id[sizeof("user-id")];
+  const char FIELD_STRINGS_expiry_policy[sizeof("expiry-policy")];
+  const char FIELD_STRINGS_snd_settle_mode[sizeof("snd-settle-mode")];
+  const char FIELD_STRINGS_capabilities[sizeof("capabilities")];
+  const char FIELD_STRINGS_coordinator[sizeof("coordinator")];
+  const char FIELD_STRINGS_available[sizeof("available")];
+  const char FIELD_STRINGS_content_encoding[sizeof("content-encoding")];
+  const char FIELD_STRINGS_delete_on_no_links_or_messages[sizeof("delete-on-no-links-or-messages")];
+  const char FIELD_STRINGS_dynamic[sizeof("dynamic")];
+  const char FIELD_STRINGS_state[sizeof("state")];
+  const char FIELD_STRINGS_declare[sizeof("declare")];
+  const char FIELD_STRINGS_batchable[sizeof("batchable")];
+  const char FIELD_STRINGS_reply_to[sizeof("reply-to")];
+  const char FIELD_STRINGS_target[sizeof("target")];
+  const char FIELD_STRINGS_settled[sizeof("settled")];
+  const char FIELD_STRINGS_role[sizeof("role")];
+  const char FIELD_STRINGS_correlation_id[sizeof("correlation-id")];
+  const char FIELD_STRINGS_address[sizeof("address")];
+  const char FIELD_STRINGS_message_annotations[sizeof("message-annotations")];
+  const char FIELD_STRINGS_first[sizeof("first")];
+  const char FIELD_STRINGS_sasl_outcome[sizeof("sasl-outcome")];
+  const char FIELD_STRINGS_source[sizeof("source")];
+  const char FIELD_STRINGS_reply_to_group_id[sizeof("reply-to-group-id")];
+  const char FIELD_STRINGS_received[sizeof("received")];
+  const char FIELD_STRINGS_to[sizeof("to")];
+  const char FIELD_STRINGS_challenge[sizeof("challenge")];
+  const char FIELD_STRINGS_section_number[sizeof("section-number")];
+  const char FIELD_STRINGS_sasl_mechanisms[sizeof("sasl-mechanisms")];
+  const char FIELD_STRINGS_properties[sizeof("properties")];
+  const char FIELD_STRINGS_durable[sizeof("durable")];
+  const char FIELD_STRINGS_channel_max[sizeof("channel-max")];
+  const char FIELD_STRINGS_description[sizeof("description")];
+  const char FIELD_STRINGS_sasl_challenge[sizeof("sasl-challenge")];
+  const char FIELD_STRINGS_amqp_sequence[sizeof("amqp-sequence")];
+  const char FIELD_STRINGS_accepted[sizeof("accepted")];
+  const char FIELD_STRINGS_begin[sizeof("begin")];
+  const char FIELD_STRINGS_footer[sizeof("footer")];
+  const char FIELD_STRINGS_ttl[sizeof("ttl")];
+  const char FIELD_STRINGS_offered_capabilities[sizeof("offered-capabilities")];
+  const char FIELD_STRINGS_transactional_state[sizeof("transactional-state")];
+  const char FIELD_STRINGS_hostname[sizeof("hostname")];
+  const char FIELD_STRINGS_delete_on_no_links[sizeof("delete-on-no-links")];
+  const char FIELD_STRINGS_mechanism[sizeof("mechanism")];
+  const char FIELD_STRINGS_handle_max[sizeof("handle-max")];
+  const char FIELD_STRINGS_last[sizeof("last")];
+  const char FIELD_STRINGS_resume[sizeof("resume")];
+  const char FIELD_STRINGS_delivery_failed[sizeof("delivery-failed")];
+  const char FIELD_STRINGS_incoming_locales[sizeof("incoming-locales")];
 };
 
 extern const struct FIELD_STRINGS FIELD_STRINGPOOL;
@@ -365,132 +365,132 @@ extern const struct FIELD_STRINGS FIELD_STRINGPOOL;
 
 const struct FIELD_STRINGS FIELD_STRINGPOOL = {
   "",
-  "state",
-  "coordinator",
-  "section-number",
-  "dynamic",
-  "fail",
-  "attach",
-  "desired-capabilities",
-  "max-frame-size",
-  "subject",
-  "code",
-  "declare",
-  "absolute-expiry-time",
-  "delete-on-close",
-  "timeout",
-  "description",
-  "echo",
-  "condition",
-  "released",
-  "priority",
   "rcv-settle-mode",
-  "message-annotations",
-  "sasl-init",
-  "outcome",
-  "begin",
-  "outgoing-window",
-  "delete-on-no-links-or-messages",
-  "challenge",
-  "delivery-failed",
-  "first",
-  "detach",
-  "target",
-  "drain",
-  "close",
-  "message-id",
-  "disposition",
-  "footer",
-  "transactional-state",
-  "next-outgoing-id",
-  "durable",
-  "dynamic-node-properties",
-  "name",
-  "last",
-  "incomplete-unsettled",
-  "group-sequence",
-  "offered-capabilities",
-  "capabilities",
-  "info",
-  "content-encoding",
-  "delivery-tag",
-  "ttl",
-  "handle-max",
-  "closed",
-  "delivery-count",
-  "channel-max",
-  "snd-settle-mode",
-  "max-message-size",
-  "hostname",
-  "reply-to-group-id",
-  "source",
-  "outcomes",
-  "link-credit",
-  "batchable",
-  "sasl-challenge",
-  "sasl-outcome",
-  "aborted",
-  "delivery-id",
-  "data",
-  "modified",
-  "application-properties",
-  "initial-response",
-  "response",
-  "sasl-mechanisms",
-  "delivery-annotations",
-  "undeliverable-here",
-  "transfer",
-  "address",
-  "delete-on-no-messages",
-  "to",
-  "txn-id",
-  "flow",
-  "remote-channel",
-  "delete-on-no-links",
-  "incoming-window",
-  "amqp-value",
-  "first-acquirer",
-  "settled",
-  "discharge",
-  "role",
-  "resume",
-  "accepted",
-  "properties",
-  "initial-delivery-count",
-  "incoming-locales",
-  "received",
   "idle-time-out",
-  "filter",
-  "end",
-  "section-offset",
-  "mechanism",
   "unsettled",
-  "creation-time",
+  "disposition",
+  "delivery-tag",
+  "detach",
+  "info",
+  "header",
+  "txn-id",
+  "rejected",
+  "priority",
+  "max-frame-size",
+  "name",
+  "close",
+  "delete-on-close",
+  "discharge",
+  "code",
+  "additional-data",
+  "filter",
+  "outcomes",
+  "undeliverable-here",
+  "content-type",
   "global-id",
-  "message-format",
+  "flow",
+  "first-acquirer",
+  "amqp-value",
+  "delivery-annotations",
+  "outgoing-window",
+  "timeout",
+  "aborted",
+  "link-credit",
+  "initial-response",
+  "error",
+  "fail",
+  "absolute-expiry-time",
+  "incomplete-unsettled",
+  "sasl-server-mechanisms",
+  "delivery-count",
+  "response",
+  "initial-delivery-count",
+  "desired-capabilities",
+  "released",
+  "sasl-init",
   "open",
+  "remote-channel",
+  "sasl-response",
+  "message-id",
+  "container-id",
+  "data",
+  "handle",
+  "application-properties",
+  "end",
+  "modified",
+  "delete-on-no-messages",
+  "max-message-size",
+  "next-outgoing-id",
+  "more",
+  "transfer",
+  "outcome",
+  "creation-time",
+  "message-format",
+  "outgoing-locales",
   "group-id",
   "next-incoming-id",
-  "sasl-server-mechanisms",
-  "declared",
-  "container-id",
-  "reply-to",
-  "expiry-policy",
-  "additional-data",
+  "group-sequence",
+  "echo",
+  "section-offset",
+  "condition",
+  "closed",
+  "incoming-window",
   "distribution-mode",
-  "error",
-  "content-type",
-  "available",
-  "rejected",
-  "amqp-sequence",
-  "outgoing-locales",
-  "handle",
-  "sasl-response",
-  "correlation-id",
-  "more",
+  "drain",
+  "subject",
+  "dynamic-node-properties",
   "default-outcome",
-  "header",
+  "delivery-id",
+  "declared",
+  "attach",
   "user-id",
+  "expiry-policy",
+  "snd-settle-mode",
+  "capabilities",
+  "coordinator",
+  "available",
+  "content-encoding",
+  "delete-on-no-links-or-messages",
+  "dynamic",
+  "state",
+  "declare",
+  "batchable",
+  "reply-to",
+  "target",
+  "settled",
+  "role",
+  "correlation-id",
+  "address",
+  "message-annotations",
+  "first",
+  "sasl-outcome",
+  "source",
+  "reply-to-group-id",
+  "received",
+  "to",
+  "challenge",
+  "section-number",
+  "sasl-mechanisms",
+  "properties",
+  "durable",
+  "channel-max",
+  "description",
+  "sasl-challenge",
+  "amqp-sequence",
+  "accepted",
+  "begin",
+  "footer",
+  "ttl",
+  "offered-capabilities",
+  "transactional-state",
+  "hostname",
+  "delete-on-no-links",
+  "mechanism",
+  "handle-max",
+  "last",
+  "resume",
+  "delivery-failed",
+  "incoming-locales",
 };
 
 /* This is an array of offsets into FIELD_STRINGPOOL */

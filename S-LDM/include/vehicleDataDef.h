@@ -67,6 +67,8 @@ namespace ldmmap {
 		double elevation;
 		double heading; // Heading between 0 and 360 degrees
 		double speed_ms;
+		double acceleration_ms;
+		std::string laneID;
 		uint64_t gnTimestamp;
 		long camTimestamp; // This is the CAM message GenerationDeltaTime
 		uint64_t timestamp_us;
@@ -79,6 +81,7 @@ namespace ldmmap {
 
 		// Low frequency container data
 		OptionalDataItem<uint8_t> exteriorLights; // Bit string with exterior lights status
+		bool juncFlag = false;    // ← new: junction‐flag
 	} vehicleData_t;
 }
 

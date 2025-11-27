@@ -21,6 +21,8 @@
 #include "utils.h"
 #include "triggerManager.h"
 
+#include "CollisionAvoidance.h"
+
 class AMQPClient : public proton::messaging_handler {
 	private:
 		std::string conn_url_;
@@ -54,7 +56,22 @@ class AMQPClient : public proton::messaging_handler {
 		std::string m_quadKey_filter="";
 
 		std::atomic<proton::container *> m_cont;
+
+		// Add a mutex to protect the shared data structure
+		std::unordered_map<uint32_t, ldmmap::vehicleData_t> vehicle_data_map;
+		std::mutex vehicle_data_mutex; // Protect access to vehicle_data_map
+		
+		char buffer[25] = {'\0'};
+
+		// proton::sender sender;// map to store the vehicle data
+		std::unordered_map<uint32_t, ldmmap::vehicleData_t> getVehicleData();
+   		
+		
 	public:
+	
+	void set_topic(const std::string& new_topic);
+		
+
 		AMQPClient(const std::string &u,const std::string &a,const double &latmin,const double &latmax,const double &lonmin, const double &lonmax, struct options *opts_ptr, ldmmap::LDMMap *db_ptr, std::string logfile_name) :
 		conn_url_(u), addr_(a), max_latitude(latmax), max_longitude(lonmax), min_latitude(latmin), min_longitude(lonmin), m_opts_ptr(opts_ptr), m_db_ptr(db_ptr), m_logfile_name(logfile_name), m_quadKey_filter("") {
 			m_printMsg=false;
@@ -128,6 +145,7 @@ class AMQPClient : public proton::messaging_handler {
 		void on_container_start(proton::container &c) override;
 		void on_connection_open(proton::connection &conn) override;
 		void on_message(proton::delivery &d, proton::message &msg) override;
+		// void send(const proton::message& msg);
 		void on_container_stop(proton::container &c) override;
 		void on_connection_close(proton::connection &conn) override;
 

@@ -29,16 +29,6 @@
 
 get_filename_component(PACKAGE_PREFIX_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../" ABSOLUTE)
 
-# Use original install prefix when loaded through a "/usr move"
-# cross-prefix symbolic link such as /lib -> /usr/lib.
-get_filename_component(_realCurr "${CMAKE_CURRENT_LIST_DIR}" REALPATH)
-get_filename_component(_realOrig "/usr/lib/cmake/ProtonCpp" REALPATH)
-if(_realCurr STREQUAL _realOrig)
-  set(PACKAGE_PREFIX_DIR "/usr")
-endif()
-unset(_realOrig)
-unset(_realCurr)
-
 macro(set_and_check _var _file)
   set(${_var} "${_file}")
   if(NOT EXISTS "${_file}")

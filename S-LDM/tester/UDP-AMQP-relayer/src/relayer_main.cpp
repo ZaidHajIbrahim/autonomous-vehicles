@@ -162,7 +162,7 @@ int main(int argc, char *argv[]) {
 	GNmetadata_t gnmetadata;
 
 
-	//int listen(int soc,int backlog);
+//int listen(int soc,int backlog);
 	while(terminatorFlag==false) {
 		//int listen(int soc,int backlog);
 		recv_bytes = recvfrom(soc, buffer, buf_length, 0, NULL, NULL);
