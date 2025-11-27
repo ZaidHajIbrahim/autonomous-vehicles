@@ -4,22 +4,27 @@
 #include <condition_variable>
 #include <thread>
 #include <time.h>
+#include <functional>
+
 
 #include "LDMmap.h"
 #include "vehicle-visualizer.h"
 #include "QuadKeyTS.h"
 #include "AMQPclient.h"
+#include "AMQPsend.h"
+#include "AMQPrecv.h"
 #include "JSONserver.h"
 #include "utils.h"
 #include "timers.h"
 
 extern "C" {
-	#include "options.h"
-	#include "CAM.h"
-	#include "DENM.h"
+   #include "options.h"
+   #include "CAM.h"
+   #include "DENM.h"
 }
 
 #include "etsiDecoderFrontend.h"
+#include "CollisionAvoidance.h"
 
 #define DB_CLEANER_INTERVAL_SECONDS 1
 #define DB_DELETE_OLDER_THAN_SECONDS 1 // This value should NEVER be set greater than (5-DB_CLEANER_INTERVAL_SECONDS/60) minutes or (300-DB_CLEANER_INTERVAL_SECONDS) seconds - doing so may break the database age check functionality!
@@ -37,6 +42,9 @@ std::condition_variable synccv;
 std::unordered_map<int,AMQPClient*> amqpclimap;
 std::mutex amqpclimutex;
 
+options *opts_ptr = nullptr;
+ldmmap::LDMMap *db_ptr = nullptr;
+
 void AMQPclient_t(ldmmap::LDMMap *db_ptr,options_t *opts_ptr,std::string logfile_name,std::string clientID,unsigned int clientIndex,indicatorTriggerManager *itm_ptr,std::string quadKey_filter,AMQPClient *main_amqp_ptr) {
 	if(clientIndex >= MAX_ADDITIONAL_AMQP_CLIENTS-1) {
 		fprintf(stderr,"[FATAL ERROR] Error: there is a bug in the code, which attemps to spawn too many AMQP clients.\nPlease report this bug to the developers.\n");
@@ -45,9 +53,9 @@ void AMQPclient_t(ldmmap::LDMMap *db_ptr,options_t *opts_ptr,std::string logfile
 		return;
 	}
 
-	if(opts_ptr->amqp_broker_x[clientIndex].amqp_reconnect_after_local_timeout_expired==true) {
-		std::cout << "[AMQPClient "<< clientID << "] This client will be restarted if a local idle timeout error occurs." << std::endl;
-	}
+   if(opts_ptr->amqp_broker_x[clientIndex].amqp_reconnect_after_local_timeout_expired==true) {
+       std::cout << "[AMQPClient "<< clientID << "] This client will be restarted if a local idle timeout error occurs." << std::endl;
+   }
 
 	AMQPClient recvClient(std::string(options_string_pop(opts_ptr->amqp_broker_x[clientIndex].broker_url)), std::string(options_string_pop(opts_ptr->amqp_broker_x[clientIndex].broker_topic)), opts_ptr->min_lat,opts_ptr->max_lat, opts_ptr->min_lon, opts_ptr->max_lon, opts_ptr, db_ptr, logfile_name);
 
@@ -144,11 +152,10 @@ void *DBcleaner_callback(void *arg) {
 	POLL_DEFINE_JUNK_VARIABLE();
 
 	while(terminatorFlag == false && tmr.waitForExpiration()==true) {
-			// ---- These operations will be performed periodically ----
+			// These operations will be performed periodically 
 
 			db_ptr->deleteOlderThanAndExecute(DB_DELETE_OLDER_THAN_SECONDS*1e3,clearVisualizerObject,static_cast<void *>(globVehVizPtr));
 
-			// --------
 	}
 
 	if(terminatorFlag == true) {
@@ -185,7 +192,8 @@ void *VehVizUpdater_callback(void *arg) {
 		vizopts_ptr->opts_ptr->max_lat,vizopts_ptr->opts_ptr->max_lon,
 		vizopts_ptr->opts_ptr->ext_lat_factor,vizopts_ptr->opts_ptr->ext_lon_factor);
 
-	globVehVizPtr=&vehicleVisObj;
+   globVehVizPtr=&vehicleVisObj;
+
 
 	synccv.notify_all();
 
@@ -203,11 +211,11 @@ void *VehVizUpdater_callback(void *arg) {
 
         while(terminatorFlag == false && tmr.waitForExpiration()==true) {
 
-                        // ---- These operations will be performed periodically ----
+                        // These operations will be performed periodically
 
                         db_ptr->executeOnAllContents(&updateVisualizer, static_cast<void *>(&vehicleVisObj));
 
-			// --------
+			
 	}
 
 	if(terminatorFlag == true) {
@@ -217,8 +225,247 @@ void *VehVizUpdater_callback(void *arg) {
 	pthread_exit(nullptr);
 }
 
+void test_collision_avoidance(ldmmap::LDMMap *db_ptr) {
+    std::cout << "****************[TEST] Starting collision avoidance tests*********************" << std::endl;
+    std::cout.flush();
+
+    // {
+    //     std::cout << "\n============================\n";
+    //     std::cout << "[TEST 1] Rear-end collision\n";
+    //     std::cout << "============================\n";
+
+    //     uint64_t base_timestamp = get_timestamp_us();
+
+    //     ldmmap::vehicleData_t veh1 = {
+    //         .stationID = 1,
+    //         .lat = 42.2000,
+    //         .lon = 12.3000,
+    //         .elevation = 0,
+    //         .heading = 10.0, // Heading > 0
+    //         .speed_ms = 10.0*1e-6,
+    //         .gnTimestamp = 0,
+    //         .timestamp_us = base_timestamp
+    //     };
+
+    //     ldmmap::vehicleData_t veh2 = {
+    //         .stationID = 2,
+    //         .lat = 42.1998, // Slightly behind veh1
+    //         .lon = 12.3000,
+    //         .elevation = 0,
+    //         .heading = 10.0, // Heading > 0
+    //         .speed_ms = 13.0*1e-6,
+    //         .gnTimestamp = 0,
+    //         .timestamp_us = base_timestamp
+    //     };
+
+    //     // Initialize previous data for acceleration calculation
+    //     CollisionAvoidance::initialize_previous_data(veh1.stationID, 8.0*1e-6, base_timestamp - 1000000); // 1 second earlier
+    //     CollisionAvoidance::initialize_previous_data(veh2.stationID, 12.0*1e-6, base_timestamp - 1000000); // 1 second earlier
+
+    //     db_ptr->insert(veh1);
+    //     db_ptr->insert(veh2);
+
+    //     CollisionAvoidance collision_avoidance;
+    //     collision_avoidance.handle_vehicle_data(*db_ptr, veh1.stationID);
+    // }
+
+    // {
+    //     std::cout << "\n============================\n";
+    //     std::cout << "[TEST 2] Cross-road collision - No collision risk\n";
+    //     std::cout << "============================\n";
+
+    //     uint64_t base_timestamp = get_timestamp_us();
+
+    //     ldmmap::vehicleData_t veh1 = {
+    //         .stationID = 1,
+    //         .lat = 42.2000,
+    //         .lon = 12.3000,
+    //         .elevation = 0,
+    //         .heading = 45.0, // Heading > 0
+    //         .speed_ms = 8.0*1e-6,
+    //         .gnTimestamp = 0,
+    //         .timestamp_us = base_timestamp
+    //     };
+
+    //     ldmmap::vehicleData_t veh2 = {
+    //         .stationID = 2,
+    //         .lat = 42.2002, // Same latitude as veh1
+    //         .lon = 12.3000,
+    //         .elevation = 0,
+    //         .heading = 135.0, // Heading > 0
+    //         .speed_ms = 10.0*1e-6,
+    //         .gnTimestamp = 0,
+    //         .timestamp_us = base_timestamp
+    //     };
+
+    //     // Initialize previous data for acceleration calculation
+    //     CollisionAvoidance::initialize_previous_data(veh1.stationID, 10.0*1e-6, base_timestamp - 1000000);
+    //     CollisionAvoidance::initialize_previous_data(veh2.stationID, 15.0*1e-6, base_timestamp - 1000000);
+
+	// 	db_ptr->insert(veh1);
+    //     db_ptr->insert(veh2);
+
+    //     CollisionAvoidance collision_avoidance;
+    //     collision_avoidance.handle_vehicle_data(*db_ptr, veh1.stationID);
+    // }
+
+    // {
+    //     std::cout << "\n==========================================\n";
+    //     std::cout << "[TEST 3] Cross-road collision - Collision risk\n";
+    //     std::cout << "==========================================\n";
+
+    //     uint64_t base_timestamp = get_timestamp_us();
+
+    //     ldmmap::vehicleData_t veh1 = {
+    //         .stationID = 0,
+    //         .lat = 42.200001,
+    //         .lon = 12.299999,
+    //         .elevation = 0,
+    //         .heading = 180.0,
+    //         .speed_ms = 10.0*1e-6,
+    //         .gnTimestamp = 0,
+    //         .timestamp_us = base_timestamp
+    //     };
+
+    //     ldmmap::vehicleData_t veh2 = {
+    //         .stationID = 1,
+    //         .lat = 42.2000,
+    //         .lon = 12.3000,
+    //         .elevation = 0,
+    //         .heading = 270.0,
+    //         .speed_ms = 8.0*1e-6,
+    //         .gnTimestamp = 0,
+    //         .timestamp_us = base_timestamp
+    //     };
+
+    //     // Initialize previous data for acceleration calculation
+    //     CollisionAvoidance::initialize_previous_data(veh1.stationID, 5.0/1e6, base_timestamp - 1000000); // 1 second earlier
+    //     CollisionAvoidance::initialize_previous_data(veh2.stationID, 4.0/1e6, base_timestamp - 1000000); // 1 second earlier
+
+    //     db_ptr->insert(veh1);
+    //     db_ptr->insert(veh2);
+
+    //     CollisionAvoidance collision_avoidance;
+    //     collision_avoidance.handle_vehicle_data(*db_ptr, veh1.stationID);
+    // }
+
+    // {
+    //     std::cout << "\n===============================\n";
+    //     std::cout << "[TEST 4] Vehicles not in range\n";
+    //     std::cout << "===============================\n";
+
+    //     uint64_t base_timestamp = get_timestamp_us();
+
+    //     ldmmap::vehicleData_t veh1 = {
+    //         .stationID = 1,
+    //         .lat = 41.1000,
+    //         .lon = 12.1000,
+    //         .elevation = 0,
+    //         .heading = 90.0, // Heading > 0
+    //         .speed_ms = 5.0*1e-6,
+    //         .gnTimestamp = 0,
+    //         .timestamp_us = base_timestamp
+    //     };
+
+    //     ldmmap::vehicleData_t veh2 = {
+    //         .stationID = 2,
+    //         .lat = 42.3900,
+    //         .lon = 12.8100, // Farther away
+    //         .elevation = 0,
+    //         .heading = 270.0, // Heading > 0
+    //         .speed_ms = 5.0*1e-6,
+    //         .gnTimestamp = 0,
+    //         .timestamp_us = base_timestamp
+    //     };
+
+    //     // Initialize previous data for acceleration calculation
+    //     CollisionAvoidance::initialize_previous_data(veh1.stationID, 4.0*1e-6, base_timestamp - 1000000); // 1 second earlier
+    //     CollisionAvoidance::initialize_previous_data(veh2.stationID, 4.0*1e-6, base_timestamp - 1000000); // 1 second earlier
+
+    //     db_ptr->insert(veh1);
+    //     db_ptr->insert(veh2);
+
+    //     CollisionAvoidance collision_avoidance;
+    //     collision_avoidance.handle_vehicle_data(*db_ptr, veh1.stationID);
+    // }
+
+	// {
+	// 	std::cout << "\n==========================================\n";
+	// 	std::cout << "[TEST 5] Outdated vehicle data\n";
+	// 	std::cout << "==========================================\n";
+
+	// 	uint64_t base_timestamp = get_timestamp_us();
+
+    //     ldmmap::vehicleData_t veh1 = {
+    //         .stationID = 1,
+    //         .lat = 41.1000,
+    //         .lon = 12.1000,
+    //         .elevation = 0,
+    //         .heading = 90.0, // Heading > 0
+    //         .speed_ms = 10.0*1e-6,
+    //         .gnTimestamp = 0,
+    //         .timestamp_us = base_timestamp
+    //     };
+
+    //     ldmmap::vehicleData_t veh2 = {
+    //         .stationID = 2,
+    //         .lat = 41.1000,
+    //         .lon = 12.1002,
+    //         .elevation = 0,
+    //         .heading = 270.0, // Heading > 0
+    //         .speed_ms = 10.0*1e-6,
+    //         .gnTimestamp = 0,
+    //         .timestamp_us = base_timestamp - 5*1e6 // 5 seconds earlier
+    //     };
+
+    //     db_ptr->insert(veh1);
+    //     db_ptr->insert(veh2);
+
+    //     CollisionAvoidance collision_avoidance;
+    //     collision_avoidance.handle_vehicle_data(*db_ptr, veh1.stationID);
+	// 	collision_avoidance.handle_vehicle_data(*db_ptr, veh2.stationID);
+    // }
+
+
+
+
+    std::cout << "******************************'[TEST] Collision avoidance tests completed.************************" << std::endl;
+}
+
+
+void AMQPrecvThreadFunc(AMQPrecv* recv_ptr) {
+   if (!recv_ptr) {
+       std::cerr << "[Thread] Error: AMQPrecv pointer is null." << std::endl;
+       return;
+   }
+   proton::container container(*recv_ptr);
+   try {
+       std::cout << "[Thread] Starting AMQP receiver container..." << std::endl;
+       container.run();
+       std::cout << "[Thread] AMQP receiver container finished." << std::endl;
+   } catch (const std::exception& e) {}
+}
+
+
 int main(int argc, char **argv) {
-	terminatorFlag = false;
+
+
+	// Initializing a new AMQPsend object
+	// std::string brokerURI = "127.0.0.1:5672";
+	// std::string topicName = "topic://sldm.to.van3t";
+	// std::string message = "Hello, Topic!";
+
+
+	// AMQPsend producer(brokerURI, topicName);
+	// // testing
+	// try {
+	// 	producer.sendMessage(message);
+	// } catch (const std::exception& e) {
+	// 	std::cerr << "Exception: " << e.what() << std::endl;
+	// }
+
+   terminatorFlag = false;
+
 
 	// DB cleaner thread ID
 	pthread_t dbcleaner_tid;
@@ -227,8 +474,10 @@ int main(int argc, char **argv) {
 	// Thread attributes (unused, for the time being)
 	// pthread_attr_t tattr;
 
+
 	// First of all, parse the options
 	options_t sldm_opts;
+
 
 	// Read options from command line
 	options_initialize(&sldm_opts);
@@ -240,6 +489,11 @@ int main(int argc, char **argv) {
 	std::time_t now = std::time(nullptr);
 	fprintf(stdout,"[INFO] The S-LDM started at %.24s, corresponding to GNTimestamp = %lu\n",std::ctime(&now),get_timestamp_ms_gn());
 	fprintf(stdout,"[INFO] S-LDM version: %s\n",VERSION_STR);
+	
+// Maybe need to take away the DP delcariton on row 476 ---------------------
+	ldmmap::LDMMap *db_ptr = new ldmmap::LDMMap();
+    db_ptr->setCentralLatLon((sldm_opts.min_lat + sldm_opts.max_lat) / 2.0,
+                             (sldm_opts.min_lon + sldm_opts.max_lon) / 2.0);
 
 	// Print, as an example, the full (internal + external) area covered by the S-LDM
 	std::cout << "This S-LDM instance will cover the full area defined by: [" << 
@@ -249,21 +503,29 @@ int main(int argc, char **argv) {
 	if(sldm_opts.cross_border_trigger==true) {
 		std::cout << "Cross-border trigger mode enabled." << std::endl;
 	}
+// Run collision avoidance test
+std::cout << "[INFO] Running collision avoidance test..." << std::endl;
+std::cout.flush();
+
+// test_collision_avoidance(db_ptr);
 
 	/* ----------------- TEST AREA (insert here your test code, which will be removed from the final version of main()) ----------------- */
 	/* ------------------------------------------------------------------------------------------------------------------------------------ */
 	/* ------------------------------------------------------------------------------------------------------------------------------------ */
 	/* ------------------------------------------------------------------------------------------------------------------------------------ */
 	/* ------------------------------------------------------------------------------------------------------------------------------------ */
-	/* ------------------------------------------------------------------------------------------------------------------------------------ */
 
-	std::cout << "*-*-*-*-*-* [INFO] S-LDM startup auto-tests started... *-*-*-*-*-*" << std::endl;
+   std::cout << "*-*-*-*-*-* [INFO] S-LDM startup auto-tests started... *-*-*-*-*-*" << std::endl;
 
-	// Create a new veheicle visualizer object
-	//vehicleVisualizer vehicleVisObj;
 
-	//vehicleVisObj.startServer();
-	//vehicleVisObj.connectToServer ();
+
+
+   // Create a new veheicle visualizer object
+   //vehicleVisualizer vehicleVisObj;
+
+
+   //vehicleVisObj.startServer();
+   //vehicleVisObj.connectToServer ();
 
 	// Draw the sample vehicle on the map (simulating 5 updates)
 	//vehicleVisObj.sendMapDraw(45.562149, 8.055311);
@@ -276,6 +538,7 @@ int main(int argc, char **argv) {
 	// vehicleVisObj.sendObjectUpdate("veh1",45.562119, 8.055311);
 	// sleep(1);
 	// vehicleVisObj.sendObjectUpdate("veh1",45.562109, 8.055311);
+
 
 	/* CAM sample (GeoNet,BTP,CAM) (85 bytes) */
 	static unsigned char cam[85] = {
@@ -291,6 +554,7 @@ int main(int argc, char **argv) {
 		0xc0, 0x8b, 0x7e, 0x83, 0x18, 0x8a, 0xf3, 0x37, /* .C~....7 */
 		0xfe, 0xeb, 0xff, 0xf6, 0x08                   /* .. */
 	};
+
 
 	/* DENM sample (140 bytes) */
 	static unsigned char denm[104] = {
@@ -311,6 +575,7 @@ int main(int argc, char **argv) {
 
 	unsigned char *ptr = &cam[0];
 
+
 	// Sample DENM from byte array
 	uint8_t denm2_bytes[190];
 	std::string denm2_content="11000501204001800086020040EE000014008CFDF01F6D075DE0B1E41B5EA6B506950D1386B801FB1B5EA82D06950FAB01F400000000000007D200000201F01F6D07C7780FB68380020F6BBC1679E3DAEF059E7D103912D71DEE1AB0C80C80001E0788600050141090230D483C7F84826FE283F302C67000C77ECD1F77563380080BF658FBBE31920040DFB297DDF18CE0020AFD96BEEF6C64801037EC89F77663380080BF642FBBB319C00415FB2E7DE318CE00202FD983EF1AC6700102";
@@ -321,8 +586,10 @@ int main(int argc, char **argv) {
 		denm2_bytes[i/2] = byte;
 	}
 
+
 	etsiDecoder::decoderFrontend decodeFrontend;
 	etsiDecoder::etsiDecodedData_t decodedData;
+
 
 	if(decodeFrontend.decodeEtsi((uint8_t *)&denm2_bytes[0], 190, decodedData)!=ETSI_DECODER_OK) {
 		std::cerr << "Error! Cannot decode ETSI packet!" << std::endl;
@@ -341,7 +608,7 @@ int main(int argc, char **argv) {
 	} else if(decodedData.type == etsiDecoder::ETSI_DECODED_DENM) {
 		DENM_t *decoded_denm;
 
-		decoded_denm = (DENM_t *) decodedData.decoded_msg;
+       decoded_denm = (DENM_t *) decodedData.decoded_msg;
 
 		printf("GNTimestamp: %u\n",decodedData.gnTimestamp);
 
@@ -354,62 +621,131 @@ int main(int argc, char **argv) {
 	}
 
 	// Test with a db
-	ldmmap::LDMMap dbtest;
-	ldmmap::vehicleData_t veh1 = {.stationID=188321312, .lat=45.562149, .lon=8.055311, .elevation=440, .heading=120, .speed_ms=17, .gnTimestamp=34235235235, .timestamp_us=0};
-	veh1.timestamp_us = get_timestamp_us(); // now
-	dbtest.insert(veh1);
-	std::printf("Test vehicle 1 inserted @ %lu\n",veh1.timestamp_us);
+	//ldmmap::LDMMap dbtest;
+	//ldmmap::vehicleData_t veh1 = {.stationID=188321312, .lat=45.562149, .lon=8.055311, .elevation=440, .heading=120, .speed_ms=17, .gnTimestamp=34235235235, .timestamp_us=0};
+	//veh1.timestamp_us = get_timestamp_us(); // now
+	//dbtest.insert(veh1);
+	//std::printf("Test vehicle 1 inserted @ %lu\n",veh1.timestamp_us);
+//
+	//ldmmap::vehicleData_t veh2 = {.stationID=288321312, .lat=45.512149, .lon=8.355311, .elevation=440, .heading=100, .speed_ms=17, .gnTimestamp=34235235235, .timestamp_us=0};
+	//veh2.timestamp_us = get_timestamp_us()-2*1e-6; // 2 seconds ago
+	//dbtest.insert(veh2);
+	//std::printf("Test vehicle 2 inserted @ %lu\n",veh2.timestamp_us);
+//
+	//ldmmap::vehicleData_t veh3 = {.stationID=388321312, .lat=45.592149, .lon=8.855311, .elevation=440, .heading=80, .speed_ms=17, .gnTimestamp=34235235235, .timestamp_us=0};
+	//veh3.timestamp_us = get_timestamp_us()-5*1e-6; // 5 seconds ago
+	//dbtest.insert(veh3);
+	//std::printf("Test vehicle 3 inserted @ %lu\n",veh3.timestamp_us);
+//
+	//ldmmap::vehicleData_t veh4 = {.stationID=488321312, .lat=45.362149, .lon=8.755311, .elevation=440, .heading=10, .speed_ms=17, .gnTimestamp=34235235235, .timestamp_us=0};
+	//veh4.timestamp_us = get_timestamp_us()-7*1e-6; // 7 seconds ago
+	//dbtest.insert(veh4);
+	//std::printf("Test vehicle 4 inserted @ %lu\n",veh4.timestamp_us);
+//
+	//// Print all the contents of the test DB (should be equal to 4)
+	//dbtest.printAllContents("Before deletion");
+//
+	//// Print the size of the test DB
+	//std::cout << "Number of elements stored in the LDMMap DB: " << dbtest.getCardinality() << std::endl;
+//
+	//// Delete now all the vehicles older than 5.5 seconds
+	//dbtest.deleteOlderThan(5500); // Only 188321312, 288321312 and 388321312 should remain in the DB
+//
+	//// Now print all the contents of the DB again
+	//dbtest.printAllContents("After deletion");
+//
+	//// Print the size of the test DB again (should be equal to 3)
+	//std::cout << "Number of elements stored in the LDMMap DB: " << dbtest.getCardinality() << std::endl;
+//
+	//dbtest.setCentralLatLon(45.562149,8.055311); // Set a central lat lon for testing the visualizer thread
+   //
+	//dbtest.clear();
+//
+	//std::cout << "*-*-*-*-*-* [INFO] S-LDM startup auto-tests terminated. The S-LDM will start now. *-*-*-*-*-*" << std::endl;
 
-	ldmmap::vehicleData_t veh2 = {.stationID=288321312, .lat=45.512149, .lon=8.355311, .elevation=440, .heading=100, .speed_ms=17, .gnTimestamp=34235235235, .timestamp_us=0};
-	veh2.timestamp_us = get_timestamp_us()-2*1e6; // 2 seconds ago
-	dbtest.insert(veh2);
-	std::printf("Test vehicle 2 inserted @ %lu\n",veh2.timestamp_us);
-
-	ldmmap::vehicleData_t veh3 = {.stationID=388321312, .lat=45.592149, .lon=8.855311, .elevation=440, .heading=80, .speed_ms=17, .gnTimestamp=34235235235, .timestamp_us=0};
-	veh3.timestamp_us = get_timestamp_us()-5*1e6; // 5 seconds ago
-	dbtest.insert(veh3);
-	std::printf("Test vehicle 3 inserted @ %lu\n",veh3.timestamp_us);
-
-	ldmmap::vehicleData_t veh4 = {.stationID=488321312, .lat=45.362149, .lon=8.755311, .elevation=440, .heading=10, .speed_ms=17, .gnTimestamp=34235235235, .timestamp_us=0};
-	veh4.timestamp_us = get_timestamp_us()-7*1e6; // 7 seconds ago
-	dbtest.insert(veh4);
-	std::printf("Test vehicle 4 inserted @ %lu\n",veh4.timestamp_us);
-
-	// Print all the contents of the test DB (should be equal to 4)
-	dbtest.printAllContents("Before deletion");
-
-	// Print the size of the test DB
-	std::cout << "Number of elements stored in the LDMMap DB: " << dbtest.getCardinality() << std::endl;
-
-	// Delete now all the vehicles older than 5.5 seconds
-	dbtest.deleteOlderThan(5500); // Only 188321312, 288321312 and 388321312 should remain in the DB
-
-	// Now print all the contents of the DB again
-	dbtest.printAllContents("After deletion");
-
-	// Print the size of the test DB again (should be equal to 3)
-	std::cout << "Number of elements stored in the LDMMap DB: " << dbtest.getCardinality() << std::endl;
-
-	dbtest.setCentralLatLon(45.562149,8.055311); // Set a central lat lon for testing the visualizer thread
-
-	dbtest.clear();
-
-	std::cout << "*-*-*-*-*-* [INFO] S-LDM startup auto-tests terminated. The S-LDM will start now. *-*-*-*-*-*" << std::endl;
-
+/* ------------------------------------------------------------------------------------------------------------------------------------ */
+	//* ------------------------------------------------------------------------------------------------------------------------------------ */
+/* ------------------------------------------------------------------------------------------------------------------------------------ */
 	/* ------------------------------------------------------------------------------------------------------------------------------------ */
 	/* ------------------------------------------------------------------------------------------------------------------------------------ */
 	/* ------------------------------------------------------------------------------------------------------------------------------------ */
-	/* ------------------------------------------------------------------------------------------------------------------------------------ */
-	/* ------------------------------------------------------------------------------------------------------------------------------------ */
 
-	// Create a new DB object
-	ldmmap::LDMMap *db_ptr = new ldmmap::LDMMap();
+
+
+
+  // --- AMQP Receiver Setup ---
+  std::cout << "[Main] Setting up AMQP Receiver..." << std::endl;
+  // Define broker URL and topic - get these from options or use defaults
+  std::string recv_broker_url = "amqp://admin:admin@127.0.0.1:5672"; // Default/Example
+  std::string recv_topic = "topic://van3t.to.sldm"; // Default/Example - Topic S-LDM should listen on
+
+
+
+
+  // Create receiver object using the constructor that takes URL and topic
+ // AMQPrecv amqp_recv(recv_broker_url, recv_topic);
+  AMQPrecv amqp_recv(*db_ptr, recv_broker_url, recv_topic);
+
+
+
+
+//   //AMQPrecvThreadFunc(&amqp_recv);
+//    std::thread amqp_recv_thread([&]() {
+//    proton::container container(amqp_recv);
+//    try {
+//      container.run();
+//    } catch (const std::exception &e) {
+//      std::cerr << "Error in AMQP client thread: " << e.what() << std::endl;
+//    }
+//   });
+
+
+std::thread amqp_recv_thread([&amqp_recv]() { // Capture amqp_recv by reference
+	try {
+		std::cout << "[Thread amqp_recv] Starting AMQP receiver container..." << std::endl;
+		proton::container container(amqp_recv); // Create container inside the thread
+		container.run();
+		std::cout << "[Thread amqp_recv] AMQP receiver container finished." << std::endl;
+	} catch (const std::exception &e) {
+		std::cerr << "[Thread amqp_recv] Error in AMQP receiver thread: " << e.what() << std::endl;
+		// Consider setting terminatorFlag if this thread failing is fatal
+		// terminatorFlag = true;
+	}
+});
+std::cout << "[Main] AMQP receiver thread started." << std::endl;
+
+// std::thread amqp_recv_thread([&amqp_recv]() { // Capture amqp_recv by reference
+// 	try {
+// 		std::cout << "[Thread amqp_recv] Starting AMQP receiver container..." << std::endl;
+// 		proton::container container(amqp_recv); // Create container inside the thread
+// 		container.run();
+// 		std::cout << "[Thread amqp_recv] AMQP receiver container finished." << std::endl;
+// 	} catch (const std::exception &e) {
+// 		std::cerr << "[Thread amqp_recv] Error in AMQP receiver thread: " << e.what() << std::endl;
+// 		// Consider setting terminatorFlag if this thread failing is fatal
+// 		// terminatorFlag = true;
+// 	}
+// });
+// std::cout << "[Main] AMQP receiver thread started." << std::endl;
+
+
+
+ // Create and start the receiver thread
+  //std::thread amqp_recv_thread(AMQPrecvThreadFunc, &amqp_recv);
+//  std::cout << "[Main] AMQP receiver thread started." << std::endl;
+ // --- End AMQP Receiver Setup ---
+   // Create a new DB object---------------------------
+  //ldmmap::LDMMap *db_ptr = new ldmmap::LDMMap();
+
+
+
 
 	// Set a central latitude and longitude depending on the coverage area of the S-LDM (to be used only for visualization purposes -
 	// - it does not affect in any way the performance or the operations of the LDMMap DB module)
 	db_ptr->setCentralLatLon((sldm_opts.min_lat+sldm_opts.max_lat)/2.0, (sldm_opts.min_lon+sldm_opts.max_lon)/2.0);
 
-	// Before starting the AMQP client event loop, we should create a parallel thread, reading periodically 
+
+	// Before starting the AMQP client event loop, we should create a parallel thread, reading periodically
 	// (e.g. every 5 s) the database through the pointer "db_ptr" and "cleaning" the entries which are too old
 	// pthread_attr_init(&tattr);
 	// pthread_attr_setdetachstate(&tattr,PTHREAD_CREATE_DETACHED);
@@ -432,7 +768,7 @@ int main(int argc, char **argv) {
 			time_t rawtime;
 			struct tm * timeinfo;
   			char buffer [25] = {NULL};
-  			time (&rawtime);	
+  			time (&rawtime);
   			timeinfo = localtime (&rawtime);
   			strftime (buffer,25,"-%Y%m%d-%H:%M:%S",timeinfo);
 			logfile_name += buffer;
@@ -489,6 +825,8 @@ int main(int argc, char **argv) {
 
 	// Create the main AMQP client object
 	AMQPClient mainRecvClient(std::string(options_string_pop(sldm_opts.amqp_broker_one.broker_url)), std::string(options_string_pop(sldm_opts.amqp_broker_one.broker_topic)), sldm_opts.min_lat, sldm_opts.max_lat, sldm_opts.min_lon, sldm_opts.max_lon, &sldm_opts, db_ptr, logfile_name);
+
+	mainRecvClient.set_topic("topic://different.topic.for.mainclient"); // Requires adding set_topic method to AMQPClient
 
 	// Create the JSONserver object for the on-demand JSON-over-TCP interface
 	JSONserver jsonsrv(db_ptr);
@@ -564,22 +902,44 @@ int main(int argc, char **argv) {
 				std::cerr << e.what() << std::endl;
 				terminatorFlag = true;
 			}
-		}
+		}while(cli_restart==true);
+
+		//implement the Collision Avoidance
+       //auto vehicleData = mainRecvClient.getVehicleData();
+       //for (const auto& [stationID, vehData] : vehicleData) {
+       //    CollisionAvoidance::handle_vehicle_data(*db_ptr, stationID);
+       //}
+
 	} while(cli_restart==true);
 
 	pthread_join(dbcleaner_tid,nullptr);
 	pthread_join(vehviz_tid,nullptr);
 
-	if(sldm_opts.num_amqp_x_enabled>0) {
-		fprintf(stdout,"[INFO] Terminating the other AMQP clients...\n");
-		// Close the connection on all the other brokers (if multiple clients are used)
-		amqpclimutex.lock();
-		for (auto const& [key, val] : amqpclimap) {
-			fprintf(stdout,"[INFO] Terminating client %d...\n",key+2);
-			val->force_container_stop();
-		}
-		amqpclimutex.unlock();
-	}
+   if(sldm_opts.num_amqp_x_enabled>0) {
+       fprintf(stdout,"[INFO] Terminating the other AMQP clients...\n");
+       // Close the connection on all the other brokers (if multiple clients are used)
+       amqpclimutex.lock();
+       for (auto const& [key, val] : amqpclimap) {
+           fprintf(stdout,"[INFO] Terminating client %d...\n",key+2);
+           val->force_container_stop();
+       }
+       amqpclimutex.unlock();
+   }
+
+//    if (amqp_recv_thread.joinable()) {
+//       // amqp_recv_thread.join();
+// 	    amqp_recv_thread.detach();
+//        std::cout << "[Main] Detached AMQP receiver thread." << std::endl;
+//    }
+
+if (amqp_recv_thread.joinable()) {
+	std::cout << "[Main] Attempting to stop AMQP receiver (AMQPrecv)..." << std::endl;
+	// <<< ADD THIS LINE >>>
+	amqp_recv.stop(); // Request the receiver thread to stop
+	// amqp_recv_thread.join(); // Optional: wait for thread to finish
+	amqp_recv_thread.detach(); // Keep detach if background exit is ok
+	std::cout << "[Main] Detached/Joined AMQP receiver thread." << std::endl; // Adjust log
+}
 
 	// Joining threads from additional AMQP clients
 	for(std::vector<std::thread>::size_type i=0;i<amqp_x_threads.size();i++) {
@@ -592,4 +952,8 @@ int main(int argc, char **argv) {
 	options_free(&sldm_opts);
 
 	return 0;
+
+	// AMQPsend link("127.0.0.1:5672", "topic://sldm.to.van3t");
+    // link.sendMessage(""); // detta startar container.run() som också lyssnar
+    // return 0;
 }

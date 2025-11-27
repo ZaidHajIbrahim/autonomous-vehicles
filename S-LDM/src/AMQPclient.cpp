@@ -5,6 +5,11 @@
 #include <iomanip>
 #include <proton/reconnect_options.hpp>
 #include <time.h>
+#include <proton/value.hpp> // Include for proton::value and type checks
+#include <proton/scalar.hpp> // Include for proton::scalar
+#include <sstream>          // Include for std::stringstream
+#include <string>           // Include for std::string, std::stod, std::stoull
+
 
 extern "C" {
 	#include "CAM.h"
@@ -159,7 +164,7 @@ AMQPClient::on_container_start(proton::container &c) {
 		//LevelOfDetail set into the tilesys class as private variables
 		tilesys.setLevelOfDetail(levelOfdetail);
 
-		std::cout << "[AMQP Client] Quadkey algoritm started." << std::endl;
+       std::cout << "[AMQP Client] Quadkey algoritm started." << std::endl;
 
 		//here we get the vector containing all the quadkeys in the range at a given level of detail
 		quadKeys = tilesys.LatLonToQuadKeyRange(min_latitude, max_latitude, min_longitude, max_longitude);
@@ -181,9 +186,9 @@ AMQPClient::on_container_start(proton::container &c) {
 
 		std::cout << "[AMQP Client] Quadkey algoritm correctly terminated." << std::endl;
 
-		// Set the AMQP filter
-		set_filter(opts, s);
-	*/
+       // Set the AMQP filter
+       set_filter(opts, s);
+   */
 
 	/* Second version of the code without the caching mechanism. Kept here for reference. */
 	// This code has been moved into a dedicated function inside QuadKeyTS.h/.cpp (getQuadKeyFilter())
@@ -221,7 +226,7 @@ AMQPClient::on_container_start(proton::container &c) {
 	// 	std::cout<<"[AMQPClient " << m_client_id.c_str() << "] No cache file found!"<<std::endl;
 	// }
 
-	// ifile.close();
+   // ifile.close();
 
 	// if(cache_file_found == false) {
 	// 	std::ofstream ofile("cachefile.sldmc");
@@ -305,7 +310,7 @@ AMQPClient::on_container_start(proton::container &c) {
 		std::cout << "[AMQPClient " << m_client_id.c_str() << "] QuadKey filter not set. Any message will be received." << std::endl;
 	}
 
-	std::cout << "[AMQPClient " << m_client_id.c_str() << "] Connecting to AMQP broker at: " << conn_url_ << std::endl;
+   std::cout << "[AMQPClient " << m_client_id.c_str() << "] Connecting to AMQP broker at: " << conn_url_ << std::endl;
 
 	proton::connection conn;
 	if(co_set == true) {
@@ -316,51 +321,152 @@ AMQPClient::on_container_start(proton::container &c) {
 		conn = c.connect(conn_url_);
 	}
 
+	// sender = conn.open_sender(addr_);
+
 	if(m_quadKey_filter!="") {
 		conn.open_receiver(addr_, proton::receiver_options().source(opts));
 	} else{
 		conn.open_receiver(addr_);
 	}
+	
 }
 
-void 
+void
 AMQPClient::on_message(proton::delivery &d, proton::message &msg) {
+   // Log reception if needed
+   if(m_logfile_name!="") {
+       fprintf(m_logfile_file,"[LOG - AMQPClient %s] Received message.\n",m_client_id.c_str());
+       fflush(m_logfile_file);
+   }
 
-	uint64_t on_msg_timestamp_us = get_timestamp_us();
 
-	etsiDecoder::etsiDecodedData_t decodedData;
+   // Print raw message if debugging
+   if(m_printMsg == true) {
+       std::cout << "[AMQPClient " << m_client_id.c_str() << "] Received message: " << msg.body() << std::endl;
+   }
 
-	uint64_t bf = 0.0,af = 0.0;
-	uint64_t main_bf = 0.0,main_af = 0.0;
 
-	if(m_logfile_name!="") {
-		main_bf=get_timestamp_ns();
+   // --- START: Handling for MSVAN3T String Format ---
+   if (msg.body().type() == proton::STRING) {
+       try {
+           std::string body_str = proton::get<std::string>(msg.body());
+           std::stringstream ss(body_str);
+           std::string segment;
+           std::vector<std::string> seglist;
 
-		// This additional log line has been commented out to avoid being too verbose
-		// fprintf(m_logfile_file,"[NEW MESSAGE RX]\n");
-	}
 
-	if(m_printMsg == true) {
-		std::cout << msg.body() << std::endl;
-	}
+           while(std::getline(ss, segment, ' ')) {
+               seglist.push_back(segment);
+           }
 
-	proton::codec::decoder qpid_decoder(msg.body());
-	proton::binary message_bin;
-	uint8_t *message_bin_buf;
 
-	// Check if a binary message has been received
-	// If no binary data has been received, just ignore the current AMQP message
-	if(qpid_decoder.next_type () == proton::BINARY) {
-		qpid_decoder >> message_bin;
+           // Expected format: vehicle_id lon lat z heading speed_ms gnTimestamp timestamp_us
+           if (seglist.size() == 8) {
+               ldmmap::vehicleData_t vehdata;
+               std::string vehicle_id_str = seglist[0];
+               // Assuming vehicle_id from MSVAN3T might have "veh" prefix, remove it if present
+               if (vehicle_id_str.rfind("veh", 0) == 0) {
+                    vehicle_id_str = vehicle_id_str.substr(3);
+               }
 
-		message_bin_buf=message_bin.data ();
-	} else {
-		// This message should be ignored
-		if(m_printMsg == true) {
-			std::cerr << "Error: received a message in a non-binary AMQP type." << std::endl;
-		}
-		return;
-	}
+
+               // Attempt to convert string ID to uint32_t. Handle potential errors.
+               try {
+                    vehdata.stationID = std::stoul(vehicle_id_str); // Use stoul for potentially larger IDs if needed, or stoi
+               } catch (const std::invalid_argument& ia) {
+                    std::cerr << "[AMQPClient " << m_client_id.c_str() << "] Error: Invalid station ID format: " << seglist[0] << std::endl;
+                    return; // Skip this message
+               } catch (const std::out_of_range& oor) {
+                    std::cerr << "[AMQPClient " << m_client_id.c_str() << "] Error: Station ID out of range: " << seglist[0] << std::endl;
+                    return; // Skip this message
+               }
+
+
+               vehdata.lon = std::stod(seglist[1]);
+               vehdata.lat = std::stod(seglist[2]);
+               vehdata.elevation = std::stod(seglist[3]) * 10.0;
+               vehdata.heading = std::stod(seglist[4]);
+               vehdata.speed_ms = std::stod(seglist[5]);
+               // gnTimestamp from MSVAN3T is double seconds, convert if LDM expects uint64_t microseconds
+               // vehdata.gnTimestamp = static_cast<uint64_t>(std::stod(seglist[6]) * 1e6); // If LDM expects microseconds
+               vehdata.gnTimestamp = std::stoull(seglist[7]); // Assuming MSVAN3T timestamp_us is already uint64_t microseconds
+               vehdata.timestamp_us = std::stoull(seglist[7]); // Use the microsecond timestamp directly
+
+
+               // Set other fields to default/unavailable as they are not in the string message
+               vehdata.stationType = ldmmap::StationType_LDM_unknown; // Or passengerCar if appropriate
+               vehdata.exteriorLights = ldmmap::OptionalDataItem<uint8_t>(false);
+               vehdata.vehicleWidth = ldmmap::OptionalDataItem<long>(false);
+               vehdata.vehicleLength = ldmmap::OptionalDataItem<long>(false);
+               vehdata.sourceQuadkey = ""; // QuadKey is not in the string message
+
+
+               // Insert into LDM
+               ldmmap::LDMMap::LDMMap_error_t db_retval = m_db_ptr->insert(vehdata);
+
+
+               if(db_retval!=ldmmap::LDMMap::LDMMAP_OK && db_retval!=ldmmap::LDMMap::LDMMAP_UPDATED) {
+                   std::cerr << "[AMQPClient " << m_client_id.c_str() << "] Error inserting/updating vehicle data (from string) for station ID " << vehdata.stationID << " - error code: " << db_retval << std::endl;
+               } else {
+                    if(m_printMsg == true) {
+                       std::cout << "[AMQPClient " << m_client_id.c_str() << "] Processed string message for vehicle: " << vehdata.stationID << std::endl;
+                    }
+               }
+
+
+           } else {
+               std::cerr << "[AMQPClient " << m_client_id.c_str() << "] Received string message with unexpected format/segment count: " << seglist.size() << std::endl;
+           }
+       } catch (const std::exception& e) {
+           std::cerr << "[AMQPClient " << m_client_id.c_str() << "] Error processing string message: " << e.what() << std::endl;
+       }
+       return; // Message handled (or failed), exit function
+   }
+   // --- END: Handling for MSVAN3T String Format ---
+
+
+
+
+   // --- START: Original ETSI Binary Format Handling ---
+   proton::codec::decoder qpid_decoder(msg.body());
+   proton::binary message_bin;
+   uint8_t *message_bin_buf;
+
+
+   // Check if a binary message has been received
+   // If no binary data has been received, just ignore the current AMQP message
+   if(qpid_decoder.next_type () == proton::BINARY) {
+       qpid_decoder >> message_bin;
+
+
+       message_bin_buf=message_bin.data ();
+   } else {
+       // This message should be ignored
+       if(m_printMsg == true) {
+           std::cerr << "Error: received a message in a non-binary AMQP type." << std::endl;
+       }
+       return;
+   }
+
+
+   uint64_t on_msg_timestamp_us = get_timestamp_us();
+
+
+   etsiDecoder::etsiDecodedData_t decodedData;
+
+
+   uint64_t bf = 0.0,af = 0.0;
+   uint64_t main_bf = 0.0,main_af = 0.0;
+
+
+   if(m_logfile_name!="") {
+       main_bf=get_timestamp_ns();
+
+
+       // This additional log line has been commented out to avoid being too verbose
+       // fprintf(m_logfile_file,"[NEW MESSAGE RX]\n");
+   }
+
 
 	if(m_logfile_name!="") {
 		bf=get_timestamp_ns();
@@ -376,8 +482,9 @@ AMQPClient::on_message(proton::delivery &d, proton::message &msg) {
 	if(m_logfile_name!="") {
 		af=get_timestamp_ns();
 
-		fprintf(m_logfile_file,"[LOG - MESSAGE DECODER (Client %s)] ProcTimeMilliseconds=%.6lf\n",m_client_id.c_str(),(af-bf)/1000000.0);
-	}
+       fprintf(m_logfile_file,"[LOG - MESSAGE DECODER (Client %s)] ProcTimeMilliseconds=%.6lf\n",m_client_id.c_str(),(af-bf)/1000000.0);
+   }
+
 
 	// If a CAM has been received, it should be used to update the internal in-memory database
 	if(decodedData.type == etsiDecoder::ETSI_DECODED_CAM || decodedData.type == etsiDecoder::ETSI_DECODED_CAM_NOGN) {
@@ -475,8 +582,6 @@ AMQPClient::on_message(proton::delivery &d, proton::message &msg) {
                     vehdata.stationType = static_cast<ldmmap::e_StationTypeLDM>(decoded_cam->cam.camParameters.basicContainer.stationType);
                 }
 
-
-
 		// Check the age of the data store inside the database (if the age check is enabled / -g option not specified)
 		// before updating it with the new receive data
 		if(m_opts_ptr->ageCheck_enabled == true && gn_timestamp != UINT64_MAX) {
@@ -543,11 +648,11 @@ AMQPClient::on_message(proton::delivery &d, proton::message &msg) {
 			vehdata.sourceQuadkey="";
 		}
 
-		if(decoded_cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleWidth != VehicleWidth_unavailable) {
-			vehdata.vehicleWidth = ldmmap::OptionalDataItem<long>(decoded_cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleWidth*100);
-		} else {
-			vehdata.vehicleWidth = ldmmap::OptionalDataItem<long>(false);
-		}
+       if(decoded_cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleWidth != VehicleWidth_unavailable) {
+           vehdata.vehicleWidth = ldmmap::OptionalDataItem<long>(decoded_cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleWidth*100);
+       } else {
+           vehdata.vehicleWidth = ldmmap::OptionalDataItem<long>(false);
+       }
 
 		if(decoded_cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleLength.vehicleLengthValue != VehicleLengthValue_unavailable) {
 			vehdata.vehicleLength = ldmmap::OptionalDataItem<long>(decoded_cam->cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency.vehicleLength.vehicleLengthValue*100);
@@ -669,10 +774,21 @@ AMQPClient::on_message(proton::delivery &d, proton::message &msg) {
 			// 	(main_af-main_bf)/1000000.0);	
 		}
 
+		// Store the vehicle data in the shared data structure
+		{
+			std::lock_guard<std::mutex> lock(vehicle_data_mutex);
+			vehicle_data_map[stationID] = vehdata; // Store the vehicle data in the map (check here of teh storing whent wrong or not leater on ---)
+		}
+
 	} else {
 		std::cerr << "Warning! Only CAM messages are supported for the time being!" << std::endl;
 		return;
 	}
+}
+
+std::unordered_map<uint32_t, ldmmap::vehicleData_t> AMQPClient::getVehicleData() {
+    std::lock_guard<std::mutex> lock(vehicle_data_mutex);
+    return vehicle_data_map;
 }
 
 void 
