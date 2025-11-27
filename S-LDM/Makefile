@@ -31,6 +31,8 @@ OBJ_OPTIONS=$(SRC_OPTIONS:$(SRC_OPTIONS_DIR)/%.c=$(OBJ_OPTIONS_DIR)/%.o)
 OBJ_DECODER=$(SRC_DECODER:$(SRC_DECODER_DIR)/%.c=$(OBJ_DECODER_DIR)/%.o)
 OBJ_ASN1=$(SRC_ASN1:$(SRC_ASN1_DIR)/%.c=$(OBJ_ASN1_DIR)/%.o)
 OBJ_JSON11=$(SRC_JSON11:$(SRC_JSON11_DIR)/%.cpp=$(OBJ_JSON11_DIR)/%.o)
+PROTON_LIBS := $(shell pkg-config --libs qpid-proton-cpp qpid-proton qpid-proton-proactor)
+LDLIBS += $(PROTON_LIBS)
 
 OBJ_CC=$(OBJ)
 OBJ_CC+=$(OBJ_VEHVIS)
@@ -41,7 +43,14 @@ OBJ_CC+=$(OBJ_JSON11)
 
 CXXFLAGS += -Wall -O3 -Iinclude -Ijson11 -Ivehicle-visualizer/include -Ioptions -std=c++17 -Idecoder-module/include -Idecoder-module/asn1/include
 CFLAGS += -Wall -O3 -Iinclude -Ioptions -Idecoder-module/asn1/include
-LDLIBS += -lcpprest -lpthread -lcrypto -lm -lGeographic $(shell pkg-config --libs --cflags libqpid-proton-cpp)
+LDLIBS += -lcpprest -lpthread -lcrypto -lm -lqpid-proton-cpp -lGeographic
+# Proton C++ flags and libs
+PROTON_CFLAGS := $(shell pkg-config --cflags qpid-proton-cpp qpid-proton qpid-proton-proactor)
+PROTON_LIBS   := $(shell pkg-config --libs   qpid-proton-cpp qpid-proton qpid-proton-proactor)
+
+CXXFLAGS += $(PROTON_CFLAGS)
+CFLAGS   += $(PROTON_CFLAGS)
+LDLIBS   += $(PROTON_LIBS)
 
 .PHONY: all clean
 

@@ -21,7 +21,6 @@ typedef struct _pthread_camrelayer_args
 	std::string m_gn_tst_prop_name;
 } pthread_camrelayer_args_t;
 
-
 class CAMrelayerAMQP : public proton::messaging_handler {
 	// For an example of usage of work_queue() to "inject" extra work (i.e. send CAMs) from external thread, see also:
 	// http://qpid.apache.org/releases/qpid-proton-0.32.0/proton/cpp/examples/multithreaded_client.cpp.html

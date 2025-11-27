@@ -17,7 +17,7 @@ OBJ_CC+=$(OBJ_RAWSOCK)
 
 CXXFLAGS += -Wall -O3 -Iinclude -IRawsock_lib/Rawsock_lib -I.
 CFLAGS += -Wall -O3 -IRawsock_lib/Rawsock_lib
-LDLIBS += -lpthread -lqpid-proton-cpp $(shell pkg-config --libs --cflags libqpid-proton-cpp)
+LDLIBS += -lpthread -lqpid-proton-cpp
 
 .PHONY: all clean
 

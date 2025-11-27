@@ -82,12 +82,11 @@ namespace ldmmap {
 		private:
 			// Main database structure
 			std::unordered_map<uint32_t,std::pair<std::shared_mutex*,std::unordered_map<uint32_t,returnedVehicleData_t>>> m_ldmmap;
-			//std::unordered_map<uint32_t, std::unordered_map<uint32_t, returnedVehicleData_t>> m_ldmmap;
 			// Database cardinality (number of entries stored in the database)
 			uint64_t m_card;
 			// Shared mutex protecting the main database structure
 			std::shared_mutex m_mainmapmut;
-			//std::mutex m_mainmapmut;
+
 			// Facility variables representing a central point around which all vehicle entries are ideally located
 			// They can be gathered and set using the setCentralLatLon() and getCentralLatLon() methods
 			// By default, they are both set to 0.0

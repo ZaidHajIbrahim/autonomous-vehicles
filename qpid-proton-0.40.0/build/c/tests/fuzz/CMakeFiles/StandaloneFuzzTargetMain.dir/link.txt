@@ -1,0 +1,2 @@
+"/usr/bin/gcc-ar-11" cr libStandaloneFuzzTargetMain.a CMakeFiles/StandaloneFuzzTargetMain.dir/StandaloneFuzzTargetMain.c.o CMakeFiles/StandaloneFuzzTargetMain.dir/StandaloneFuzzTargetInit.c.o
+"/usr/bin/gcc-ranlib-11" libStandaloneFuzzTargetMain.a

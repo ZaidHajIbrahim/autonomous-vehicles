@@ -1,0 +1,1 @@
+/usr/bin/c++  -fvisibility=hidden -O2 -g -DNDEBUG -flto -fno-fat-lto-objects CMakeFiles/fuzz-message-decode.dir/fuzz-message-decode.c.o -o fuzz-message-decode  -Wl,-rpath,/home/ed-5355-3/DAT295/autonomous-vehicles/qpid-proton-0.40.0/build/c libStandaloneFuzzTargetMain.a ../../libqpid-proton-core.so.10.15.0 

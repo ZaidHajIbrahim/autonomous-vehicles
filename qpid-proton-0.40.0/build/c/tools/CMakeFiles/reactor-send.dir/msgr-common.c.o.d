@@ -1,0 +1,61 @@
+c/tools/CMakeFiles/reactor-send.dir/msgr-common.c.o: \
+ /home/ed-5355-3/DAT295/autonomous-vehicles/qpid-proton-0.40.0/c/tools/msgr-common.c \
+ /usr/include/stdc-predef.h \
+ /home/ed-5355-3/DAT295/autonomous-vehicles/qpid-proton-0.40.0/c/tools/msgr-common.h \
+ /home/ed-5355-3/DAT295/autonomous-vehicles/qpid-proton-0.40.0/c/tools/include/pncompat/misc_defs.h \
+ /home/ed-5355-3/DAT295/autonomous-vehicles/qpid-proton-0.40.0/c/include/proton/types.h \
+ /home/ed-5355-3/DAT295/autonomous-vehicles/qpid-proton-0.40.0/c/include/proton/import_export.h \
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/stddef.h \
+ /home/ed-5355-3/DAT295/autonomous-vehicles/qpid-proton-0.40.0/c/include/proton/type_compat.h \
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/stdbool.h \
+ /usr/include/x86_64-linux-gnu/sys/types.h /usr/include/features.h \
+ /usr/include/features-time64.h \
+ /usr/include/x86_64-linux-gnu/bits/wordsize.h \
+ /usr/include/x86_64-linux-gnu/bits/timesize.h \
+ /usr/include/x86_64-linux-gnu/sys/cdefs.h \
+ /usr/include/x86_64-linux-gnu/bits/long-double.h \
+ /usr/include/x86_64-linux-gnu/gnu/stubs.h \
+ /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
+ /usr/include/x86_64-linux-gnu/bits/types.h \
+ /usr/include/x86_64-linux-gnu/bits/typesizes.h \
+ /usr/include/x86_64-linux-gnu/bits/time64.h \
+ /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/time_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/timer_t.h \
+ /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/stdint.h /usr/include/stdint.h \
+ /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
+ /usr/include/x86_64-linux-gnu/bits/wchar.h \
+ /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h /usr/include/getopt.h \
+ /usr/include/x86_64-linux-gnu/bits/getopt_core.h \
+ /usr/include/x86_64-linux-gnu/bits/getopt_ext.h /usr/include/inttypes.h \
+ /home/ed-5355-3/DAT295/autonomous-vehicles/qpid-proton-0.40.0/c/include/proton/annotations.h \
+ /home/ed-5355-3/DAT295/autonomous-vehicles/qpid-proton-0.40.0/c/include/proton/message.h \
+ /home/ed-5355-3/DAT295/autonomous-vehicles/qpid-proton-0.40.0/c/include/proton/codec.h \
+ /home/ed-5355-3/DAT295/autonomous-vehicles/qpid-proton-0.40.0/c/include/proton/error.h \
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/stdarg.h \
+ /home/ed-5355-3/DAT295/autonomous-vehicles/qpid-proton-0.40.0/c/tools/include/pncompat/misc_funcs.inc \
+ /home/ed-5355-3/DAT295/autonomous-vehicles/qpid-proton-0.40.0/c/tools/include/pncompat/misc_defs.h \
+ /usr/include/x86_64-linux-gnu/sys/time.h \
+ /usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h \
+ /usr/include/x86_64-linux-gnu/sys/select.h \
+ /usr/include/x86_64-linux-gnu/bits/select.h \
+ /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h \
+ /usr/include/x86_64-linux-gnu/bits/select2.h /usr/include/stdio.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__FILE.h \
+ /usr/include/x86_64-linux-gnu/bits/types/FILE.h \
+ /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h \
+ /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
+ /usr/include/x86_64-linux-gnu/bits/floatn.h \
+ /usr/include/x86_64-linux-gnu/bits/floatn-common.h \
+ /usr/include/x86_64-linux-gnu/bits/stdio.h \
+ /usr/include/x86_64-linux-gnu/bits/stdio2.h /usr/include/stdlib.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib.h /usr/include/string.h \
+ /usr/include/x86_64-linux-gnu/bits/string_fortified.h \
+ /usr/include/assert.h

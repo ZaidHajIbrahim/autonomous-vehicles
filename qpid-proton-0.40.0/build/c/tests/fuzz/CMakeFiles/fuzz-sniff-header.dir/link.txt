@@ -1,0 +1,1 @@
+/usr/bin/c++  -fvisibility=hidden -O2 -g -DNDEBUG -flto -fno-fat-lto-objects CMakeFiles/fuzz-sniff-header.dir/fuzz-sniff-header.c.o CMakeFiles/fuzz-sniff-header.dir/__/__/src/core/autodetect.c.o -o fuzz-sniff-header  libStandaloneFuzzTargetMain.a 
