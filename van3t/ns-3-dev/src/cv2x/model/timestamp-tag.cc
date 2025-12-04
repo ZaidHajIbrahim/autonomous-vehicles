@@ -27,7 +27,7 @@ NS_OBJECT_ENSURE_REGISTERED (TimestampTag);
 TypeId
 TimestampTag::GetTypeId (void)
 {
-  static TypeId tid = TypeId ("ns3::TimestampTag")
+  static TypeId tid = TypeId ("ns3::Cv2xTimestampTag")
     .SetParent<Tag> ()
     .SetGroupName ("Wifi")
     .AddConstructor<TimestampTag> ()

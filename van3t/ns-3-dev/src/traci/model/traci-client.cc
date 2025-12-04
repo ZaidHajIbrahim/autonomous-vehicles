@@ -301,6 +301,7 @@ namespace ns3
     catch (std::exception& e)
       {
         terminateVehicleVisualizer();
+	std::cout << "hello\n";
         NS_FATAL_ERROR("Can not connect to sumo via traci: " << e.what());
       }
 

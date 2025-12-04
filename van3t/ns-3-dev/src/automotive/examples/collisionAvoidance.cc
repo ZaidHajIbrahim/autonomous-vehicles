@@ -16,7 +16,7 @@
 #include "traci-client-global.h"
 #include "AMQPsend.h"
 
-
+NS_LOG_COMPONENT_DEFINE ("CollisionAvoidance");
 namespace ns3 {
 
 

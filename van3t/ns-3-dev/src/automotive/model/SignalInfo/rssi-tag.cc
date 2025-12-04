@@ -27,7 +27,7 @@ NS_OBJECT_ENSURE_REGISTERED (RssiTag);
 TypeId
 RssiTag::GetTypeId (void)
 {
-  static TypeId tid = TypeId ("ns3::RssiTag")
+  static TypeId tid = TypeId ("ns3::AutomotiveRssiTag")
     .SetParent<Tag> ()
     .SetGroupName ("Wifi")
     .AddConstructor<RssiTag> ()

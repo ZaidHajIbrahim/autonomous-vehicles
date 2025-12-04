@@ -57,7 +57,8 @@ compilePC compilePCdebug: $(EXECNAME)
 
 # Standard targets
 $(EXECNAME): $(OBJ_CC)
-	$(CXX) $(LDFLAGS) $^ $(LDLIBS) $(CXXFLAGS) $(CFLAGS) -o $@
+	#$(CXX) $(LDFLAGS) $^ $(LDLIBS) $(CXXFLAGS) $(CFLAGS) -o $@
+	$(CXX) $(LDFLAGS) $^ -o $@ -Wl,--copy-dt-needed-entries $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@ mkdir -p $(OBJ_DIR)
