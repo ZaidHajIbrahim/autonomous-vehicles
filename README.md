@@ -22,7 +22,7 @@ When asked enter log-in info
 - Password: admin
 - Y for anonymous login
 ### Run the broker
-```
+```bash
 cd ~/DAT295/<DIR>/bin/
 ./artemis run
 ```
@@ -30,7 +30,7 @@ cd ~/DAT295/<DIR>/bin/
 
 ### Install Proton 0.40.0
 Download and unpack the Proton tar file and then run the following:
-```
+```bash
 rm -rf build
 mkdir build && cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local
@@ -40,7 +40,7 @@ sudo ldconfig
 ```
 ### Build the S-LDM
 Follow the instructions, taken from the official repository, but the files are edited upon, so do not replace them:
-```
+```bash
 rm -rf build
 mkdir build && cd build
 cmake ..
@@ -74,13 +74,13 @@ ldconfig -p | grep proton
 **Fix:**  
 Edit the S-LDM `Makefile` and replace:
 
-```
+```bash
 $(EXECNAME): $(OBJ_CC)
 ```
 
 with:
 
-```
+```bash
 $(CXX) $(LDFLAGS) $^ -o $@ -Wl,--copy-dt-needed-entries $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
 ```
 
