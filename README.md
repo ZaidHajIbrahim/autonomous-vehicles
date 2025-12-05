@@ -128,4 +128,3 @@ Not recommanded, but go the lines that is complaining and comment them out, it i
 Installing SUMO is not included in this README
 ### Testing the maps
 
-# End of File
